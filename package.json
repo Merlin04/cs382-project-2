@@ -3,7 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-  	"start": "bun run index.ts"
+  	"start": "bun run index.ts",
+    "latex": "rm -f *.aux *.log *.out *.pdf *.toc && pdflatex main.tex"
   },
   "devDependencies": {
     "bun-types": "latest"
