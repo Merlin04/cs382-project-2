@@ -1,4 +1,4 @@
-import SMap from "./smap.ts";
+import SMap, { s_eq } from "./smap.ts";
 
 export class Graph<TKey, TValue> {
     vertices: Map<TKey, TValue>
@@ -24,7 +24,7 @@ export class Graph<TKey, TValue> {
 
     delete_vertex(k: TKey) : void {
         for (const [[k_u, k_v], _] of this.edges) {
-            if (k === k_u || k === k_v) {
+            if (s_eq(k, k_u) || s_eq(k, k_v)) {
                 this.edges.delete([k_u, k_v]);
             }
         }
@@ -38,5 +38,11 @@ export class Graph<TKey, TValue> {
     delete_edge(k_u: TKey, k_v: TKey) : void {
         this.edges.delete([k_u, k_v]);
         this.edges.delete([k_v, k_u]);
+    }
+
+    get_adj(k_u: TKey) : TKey[] {
+        return Array.from(this.edges.keys())
+            .filter(([f, _]) => s_eq(f, k_u))
+            .map(([_, t]) => t);
     }
 }

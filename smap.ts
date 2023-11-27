@@ -63,3 +63,6 @@ export default class SMap<TKey, TValue> implements Map<TKey, TValue> {
 
     [Symbol.toStringTag] = "SMap";
 }
+
+export const s_eq = <T>(a : T, b : T) =>
+    JSON.stringify(a) === JSON.stringify(b);

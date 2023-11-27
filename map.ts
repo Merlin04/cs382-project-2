@@ -1,6 +1,26 @@
 import { Graph } from "./graph.ts";
+import SMap, { s_eq } from "./smap.ts";
 
 type Point2 = [number, number]
+
+type ShortestPathsData = { dist: number, parent: Point2 | null };
+type ShortestPathsResult = SMap<Point2, ShortestPathsData>;
+
+const print_shortest_paths = (s : ShortestPathsResult) => {
+	let v : Record<number, [number, ShortestPathsData][]> = {};
+	for(const [[x, y], d] of s.entries()) {
+		(v[x] ?? (v[x] = [])).push([y, d]);
+	}
+	for(const [_, d] of Object.entries(v)
+		.sort((a, b) => Number(a[0]) - Number(b[0]))) {
+		process.stdout.write(d
+			.sort((a, b) => a[0] - b[0])
+			.map(d => d[1].dist)
+			.join(" ")
+			+ "\n"
+		);
+	}
+};
 
 // can't conflict with builtin Map class
 export class GMap extends Graph<Point2, number> {
@@ -66,5 +86,26 @@ export class GMap extends Graph<Point2, number> {
 
 	is_obstacle(x: number, y: number): boolean {
 		return this.vertices.get([x, y]) !== undefined;
+	}
+
+	bfs_sssp(source: Point2) : ShortestPathsResult {
+		const m = new SMap<Point2, { dist : number, parent : Point2 | null }>();
+		const get = (v: Point2) => m.get(v)!;
+		for(const [point, _weight] of this.vertices) {
+			m.set(point, { dist: s_eq(point, source) ? 0 : Infinity, parent: null });
+		}
+		const q = [source];
+
+		let u; while(u = q.shift()) {
+			for(const v of this.get_adj(u)) {
+				if(get(v).dist === Infinity) {
+					get(v).dist = get(u).dist + 1;
+					get(v).parent = u;
+					q.push(v);
+				}
+			}
+		}
+
+		return m;
 	}
 }

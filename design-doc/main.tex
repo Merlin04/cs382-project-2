@@ -8,33 +8,46 @@
 \maketitle
 \tableofcontents
 
-    \section{Division of Labor}
-    \subsection{Dale}
-    \begin{itemize}
-        \item Wrote map.ts
-        \item Wrote check-in document
-        \item Future tasks:
-        \item document map class
-    \end{itemize}
-    \subsection{Patrick}
-    \begin{itemize}
-        \item Wrote graph.ts
-        \item Future tasks:
-        \item document graph class
-    \end{itemize}
-    \subsection{B}
-    \begin{itemize}
-        \item created repository/Bun project structure
-        \item code contributions/fixes
-        \item parts of design document
-        \item Future tasks:
-        \item Breadth-first search
-        \item document BFS
-    \end{itemize}
+\section{Division of Labor}
+\subsection{Dale}
+\begin{itemize}
+    \item Wrote map.ts
+    \item Wrote check-in document
+    \item Future tasks:
+    \item document map class
+\end{itemize}
+\subsection{Patrick}
+\begin{itemize}
+    \item Wrote graph.ts
+    \item Future tasks:
+    \item document graph class
+\end{itemize}
+\subsection{B}
+\begin{itemize}
+    \item created repository/Bun project structure
+    \item code contributions/fixes
+    \item parts of design document
+    \item Future tasks:
+    \item Breadth-first search
+    \item document BFS
+\end{itemize}
 
-    \section{Plan}
-    We plan to check in next week to make sure everything is being worked on.
-    We've already made good progress; we will likely finish up the design document next week.
-    Note that we weren't really given enough time to start on the breadth-first search section, due to the canceled classes and my own (Dale) slow progress on the map class.
+\section{Plan}
+We plan to check in next week to make sure everything is being worked on.
+We've already made good progress; we will likely finish up the design document next week.
+Note that we weren't really given enough time to start on the breadth-first search section, due to the canceled classes and my own (Dale) slow progress on the map class.
+
+\section{Technical overview}
+This project is written in TypeScript, which is a typed superset of JavaScript.
+We chose TypeScript because we wanted a language that's imperative, isn't Python (as all group members expressed a strong dislike for it), and is easy to pick up if you don't already know it.
+We're using the Bun JavaScript runtime since it's reasonably simple and supports TypeScript out of the box.
+
+\subsection{Installation}
+To install Bun, follow the instructions on \url{https://bun.sh/docs/installation}.
+Then, run \texttt{bun install} in the project root to install dependencies, and run \texttt{bun run index.ts} to run the program.
+
+\subsection{Graph usage}
+The \texttt{graph.ts} file contains our implementation of a key-value graph data structure.
+It uses two hashmaps, one for vertices and another for edges - the vertices map holds keys and values, and the edges map holds a pair of two keys and the associated weight.
 
 \end{document}
