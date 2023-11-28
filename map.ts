@@ -1,7 +1,7 @@
 import { Graph } from "./graph.ts";
 import SMap, { s_eq } from "./smap.ts";
 
-type Point2 = [number, number]
+export type Point2 = [number, number]
 
 type ShortestPathsData = { dist: number, parent: Point2 | null };
 type ShortestPathsResult = SMap<Point2, ShortestPathsData>;
@@ -85,7 +85,7 @@ export class GMap extends Graph<Point2, number> {
 	}
 
 	is_obstacle(x: number, y: number): boolean {
-		return this.vertices.get([x, y]) !== undefined;
+		return this.vertices.get([x, y]) === undefined;
 	}
 
 	bfs_sssp(source: Point2) : ShortestPathsResult {
