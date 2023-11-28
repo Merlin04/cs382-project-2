@@ -1,6 +1,13 @@
 import { Graph } from "./graph.ts";
-import { GMap, Point2 } from "./map.ts";
+import { GMap, print_shortest_paths } from "./map.ts";
 import { s_eq } from "./smap.ts";
+
+const assert_eq = <T>(test: T, expected: T) => {
+    if(test !== expected) {
+        process.stderr.write(`Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(test)}`);
+    }
+    return test === expected;
+}
 
 const tests: Record<string, (() => boolean)> = {
     "graph basic ops": () => {
@@ -20,11 +27,20 @@ const tests: Record<string, (() => boolean)> = {
             && s_eq(g.get_adj("world").sort(), ["hello", "oomfie"].sort());
     },
     "map basic ops": () => {
+        const m = new GMap(4, [[2, 1]]);
+        return assert_eq(m.print_pretty(), `. . . .
+. . # .
+. . . .
+. . . .
+`) && (
+        m.add_obstacle([0, 1]),
+        m.remove_obstacle([1, 1]),
+        m.is_obstacle([0, 1]));
+    },
+    "bfs_sssp": () => {
         const m = new GMap(4, [[1, 1]]);
-        m.print_pretty();
-        m.add_obstacle(0, 1);
-        m.remove_obstacle(1, 1);
-        return m.is_obstacle(0, 1);
+        const r = m.bfs_sssp([2, 1]);
+        return assert_eq(print_shortest_paths(r), "3\t2\t1\t2\n4\t \t0\t1\n3\t2\t1\t2\n4\t3\t2\t3\n");
     }
 }
 

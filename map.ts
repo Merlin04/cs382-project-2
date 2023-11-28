@@ -6,20 +6,20 @@ export type Point2 = [number, number]
 type ShortestPathsData = { dist: number, parent: Point2 | null };
 type ShortestPathsResult = SMap<Point2, ShortestPathsData>;
 
-const print_shortest_paths = (s : ShortestPathsResult) => {
+export const print_shortest_paths = (s : ShortestPathsResult) : string => {
 	let v : Record<number, [number, ShortestPathsData][]> = {};
 	for(const [[x, y], d] of s.entries()) {
-		(v[x] ?? (v[x] = [])).push([y, d]);
+		(v[y] ?? (v[y] = [])).push([x, d]);
 	}
+	let res = "";
 	for(const [_, d] of Object.entries(v)
 		.sort((a, b) => Number(a[0]) - Number(b[0]))) {
-		process.stdout.write(d
-			.sort((a, b) => a[0] - b[0])
-			.map(d => d[1].dist)
-			.join(" ")
-			+ "\n"
-		);
+		const r = d.sort((a, b) => a[0] - b[0]);
+		res += Array.from({ length: r.at(-1)![0] + 1 }, (_, y) =>
+			r.find(v => v[0] === y)?.[1].dist ?? " "
+		).join("\t") + "\n";
 	}
+	return res;
 };
 
 // can't conflict with builtin Map class
@@ -46,29 +46,21 @@ export class GMap extends Graph<Point2, number> {
 			}
 		}
 		for (const i of obstacles) {
-			const [x, y] = i;
-			this.add_obstacle(x, y);
+			this.add_obstacle(i);
 		}
 	}
 
-	print_pretty(): void {
-		for (let y of Array(this.size).fill(this.size - 1).map((x, y) => x - y)) {
-			for (let x of Array(this.size).fill(this.size - 1).map((x, y) => x + y)) {
-				if (this.is_obstacle(x, y)) {
-					process.stdout.write("# ");
-				} else {
-					process.stdout.write(". ");
-				}
-			}
-			process.stdout.write("\n");
-		}
+	print_pretty(): string {
+		const i = Array(this.size).fill(undefined);
+		return i.map((_, y) => i.map((_, x) =>
+			this.is_obstacle([x, y]) ? "#" : ".").join(" ") + "\n").join("");
 	}
 
-	add_obstacle(x: number, y: number): void {
-		this.delete_vertex([x, y]);
+	add_obstacle(p: Point2): void {
+		this.delete_vertex(p);
 	}
 
-	remove_obstacle(x: number, y: number): void {
+	remove_obstacle([x, y]: Point2): void {
 		this.add_vertex([x, y], 0);
 		if (x !== 0) {
 			this.add_edge([x, y], [x - 1, y], 1);
@@ -84,8 +76,8 @@ export class GMap extends Graph<Point2, number> {
 		}
 	}
 
-	is_obstacle(x: number, y: number): boolean {
-		return this.vertices.get([x, y]) === undefined;
+	is_obstacle(p: Point2): boolean {
+		return this.vertices.get(p) === undefined;
 	}
 
 	bfs_sssp(source: Point2) : ShortestPathsResult {

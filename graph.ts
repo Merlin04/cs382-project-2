@@ -22,12 +22,13 @@ export class Graph<TKey, TValue> {
         }
     }
 
-    delete_vertex(k: TKey) : void {
+    delete_vertex(k: TKey) : boolean {
         for (const [[k_u, k_v], _] of this.edges) {
             if (s_eq(k, k_u) || s_eq(k, k_v)) {
                 this.edges.delete([k_u, k_v]);
             }
         }
+        return this.vertices.delete(k);
     }
 
     add_edge(k_u: TKey, k_v: TKey, w: number) : void {
@@ -44,5 +45,21 @@ export class Graph<TKey, TValue> {
         return Array.from(this.edges.keys())
             .filter(([f, _]) => s_eq(f, k_u))
             .map(([_, t]) => t);
+    }
+
+    debug_generate_graphviz() : string {
+        // generate a simple graphviz representation of the graph
+        // seems to work best with neato engine
+        // and render here: https://dreampuf.github.io/GraphvizOnline/
+        const d = <T>(o: T) => JSON.stringify(JSON.stringify(o));
+        let s = "digraph {\n";
+        for (const [k, _] of this.vertices) {
+            s += `    ${d(k)}\n`;
+        }
+        for (const [[k_u, k_v], _] of this.edges) {
+            s += `    ${d(k_u)} -> ${d(k_v)}\n`;
+        }
+        s += "}";
+        return s;
     }
 }
