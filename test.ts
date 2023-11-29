@@ -1,5 +1,5 @@
 import { Graph } from "./graph.ts";
-import { GMap, print_shortest_paths } from "./map.ts";
+import { GMap } from "./map.ts";
 import { s_eq } from "./smap.ts";
 
 const assert_eq = <T>(test: T, expected: T) => {
@@ -38,9 +38,14 @@ const tests: Record<string, (() => boolean)> = {
         m.is_obstacle([0, 1]));
     },
     "bfs_sssp": () => {
-        const m = new GMap(4, [[1, 1]]);
-        const r = m.bfs_sssp([2, 1]);
-        return assert_eq(print_shortest_paths(r), "3\t2\t1\t2\n4\t \t0\t1\n3\t2\t1\t2\n4\t3\t2\t3\n");
+        const m = new GMap(5, [[2, 0], [1, 1]]);
+        const r = m.bfs_sssp([4, 0]);
+        return assert_eq(m.print_shortest_paths(r), "8 9 # 1 0\n7 # 3 2 1\n6 5 4 3 2\n7 6 5 4 3\n8 7 6 5 4\n");
+    },
+    "bfs_spsp": () => {
+        const m = new GMap(5, [[2, 0], [1, 1]]);
+        const p = m.bfs_spsp([1, 0], [4, 0]);
+        return assert_eq(m.print_shortest_path(p), "1 0 # 8 9\n2 # 6 7 .\n3 4 5 . .\n. . . . .\n. . . . .\n");
     }
 }
 

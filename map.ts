@@ -5,22 +5,7 @@ export type Point2 = [number, number]
 
 type ShortestPathsData = { dist: number, parent: Point2 | null };
 type ShortestPathsResult = SMap<Point2, ShortestPathsData>;
-
-export const print_shortest_paths = (s : ShortestPathsResult) : string => {
-	let v : Record<number, [number, ShortestPathsData][]> = {};
-	for(const [[x, y], d] of s.entries()) {
-		(v[y] ?? (v[y] = [])).push([x, d]);
-	}
-	let res = "";
-	for(const [_, d] of Object.entries(v)
-		.sort((a, b) => Number(a[0]) - Number(b[0]))) {
-		const r = d.sort((a, b) => a[0] - b[0]);
-		res += Array.from({ length: r.at(-1)![0] + 1 }, (_, y) =>
-			r.find(v => v[0] === y)?.[1].dist ?? " "
-		).join("\t") + "\n";
-	}
-	return res;
-};
+type Path = Point2[];
 
 // can't conflict with builtin Map class
 export class GMap extends Graph<Point2, number> {
@@ -50,10 +35,17 @@ export class GMap extends Graph<Point2, number> {
 		}
 	}
 
-	print_pretty(): string {
+	str_map(): string[][] {
 		const i = Array(this.size).fill(undefined);
-		return i.map((_, y) => i.map((_, x) =>
-			this.is_obstacle([x, y]) ? "#" : ".").join(" ") + "\n").join("");
+		return i.map((_, y) => i.map((_, x) => this.is_obstacle([x, y]) ? "#" : "."));
+	}
+
+	print_str_map(m : string[][]) {
+		return m.map(r => r.join(" ") + "\n").join("");
+	}
+
+	print_pretty(): string {
+		return this.print_str_map(this.str_map());
 	}
 
 	add_obstacle(p: Point2): void {
@@ -99,5 +91,36 @@ export class GMap extends Graph<Point2, number> {
 		}
 
 		return m;
+	}
+
+	print_shortest_paths(s : ShortestPathsResult) : string {
+		const m = this.str_map();
+		for(const [[x, y], d] of s.entries()) {
+			if(d.dist !== Infinity) {
+				m[y][x] = d.dist.toString();
+			}
+		}
+		return this.print_str_map(m);
+	}
+
+	bfs_spsp(source: Point2, dest: Point2) : Path {
+		const r = this.bfs_sssp(source);
+		const dest_d = r.get(dest);
+		if(!dest_d) throw new Error("Destination not reachable from source");
+		let v = dest_d;
+		let a = [dest];
+		while(v.dist !== 0) {
+			a.unshift(v.parent!);
+			v = r.get(v.parent!)!;
+		}
+		return a;
+	}
+
+	print_shortest_path(path: Path) : string {
+		const m = this.str_map();
+		path.forEach(([x, y], i) => {
+			m[y][x] = i.toString();
+		});
+		return this.print_str_map(m);
 	}
 }
