@@ -1,4 +1,5 @@
 import { Graph } from "./graph.ts";
+import { Heap } from "./heap.ts";
 import SMap, { s_eq } from "./smap.ts";
 
 export type Point2 = [number, number]
@@ -122,5 +123,27 @@ export class GMap extends Graph<Point2, number> {
 			m[y][x] = i.toString();
 		});
 		return this.print_str_map(m);
+	}
+
+	dijkstra(source: Point2) : ShortestPathsResult {
+		const m = new SMap<Point2, { dist : number, parent : Point2 | null }>();
+		const get = (v: Point2) => m.get(v)!;
+		for(const [point, _weight] of this.vertices) {
+			m.set(point, { dist: s_eq(point, source) ? 0 : Infinity, parent: null });
+		}
+		const q = new Heap<Point2>((a: Point2, b: Point2) => get(a).dist < get(b).dist);
+
+		let u; while(u = q.pop_min()) {
+			for(const v of this.get_adj(u)) {
+				if(get(v).dist === Infinity) {
+					get(v).dist = get(u).dist + 1;
+					get(v).parent = u;
+					q.push(v);
+				}
+			}
+		}
+
+		return m;
+
 	}
 }
