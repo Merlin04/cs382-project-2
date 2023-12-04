@@ -5,7 +5,7 @@ import SMap, { s_eq } from "./smap.ts";
 export type Point2 = [number, number]
 
 type ShortestPathsData = { dist: number, parent: Point2 | null };
-type ShortestPathsResult = SMap<Point2, ShortestPathsData>;
+type ShortestPathsResult = { n_visited_before?: number; m: SMap<Point2, ShortestPathsData> };
 type Path = Point2[];
 
 // can't conflict with builtin Map class
@@ -91,21 +91,21 @@ export class GMap extends Graph<Point2, number> {
 			}
 		}
 
-		return m;
+		return { n_visited_before: undefined, m };
 	}
 
 	print_shortest_paths(s : ShortestPathsResult) : string {
 		const m = this.str_map();
-		for(const [[x, y], d] of s.entries()) {
+		for(const [[x, y], d] of s.m.entries()) {
 			if(d.dist !== Infinity) {
 				m[y][x] = d.dist.toString();
 			}
 		}
-		return this.print_str_map(m);
+		return /*`vertices visited: ${s.n_visited_before}\n${*/this.print_str_map(m)/*}`*/;
 	}
 
 	bfs_spsp(source: Point2, dest: Point2) : Path {
-		const r = this.bfs_sssp(source);
+		const r = this.bfs_sssp(source).m;
 		const dest_d = r.get(dest);
 		if(!dest_d) throw new Error("Destination not reachable from source");
 		let v = dest_d;
@@ -125,27 +125,8 @@ export class GMap extends Graph<Point2, number> {
 		return this.print_str_map(m);
 	}
 
-	dijkstra(source: Point2) : ShortestPathsResult {
-		const m = new SMap<Point2, { dist : number, parent : Point2 | null }>();
-		const get = (v: Point2) => m.get(v)!;
-		for(const [point, _weight] of this.vertices) {
-			m.set(point, { dist: s_eq(point, source) ? 0 : Infinity, parent: null });
-		}
-		const q = new Heap<Point2>((a: Point2, b: Point2) => get(a).dist < get(b).dist);
-		q.push(source);
-
-		let u; while(u = q.pop_min()) {
-			for(const v of this.get_adj(u)) {
-				if(get(v).dist === Infinity) {
-					get(v).dist = get(u).dist + 1;
-					get(v).parent = u;
-					q.push(v);
-				}
-			}
-		}
-
-		return m;
-
+	dijkstra(source: Point2, target?: Point2) : ShortestPathsResult {
+		return this.wfs(source, (_, p, m) => m.get(p)!.dist, target);
 	}
 
 	wfs(
@@ -153,7 +134,8 @@ export class GMap extends Graph<Point2, number> {
 		heuristic: (
 			map: this,
 			point: Point2,
-			m: SMap<Point2, { dist : number, parent : Point2 | null }>) => number
+			m: SMap<Point2, { dist : number, parent : Point2 | null }>) => number,
+		target?: Point2
 	) : ShortestPathsResult {
 		const m = new SMap<Point2, { dist : number, parent : Point2 | null }>();
 		const get = (v: Point2) => m.get(v)!;
@@ -163,7 +145,9 @@ export class GMap extends Graph<Point2, number> {
 		const q = new Heap<Point2>((a: Point2, b: Point2) => heuristic(this, a, m) < heuristic(this, b, m));
 		q.push(source);
 
+		let n_visited_before = 0;
 		let u; while(u = q.pop_min()) {
+			if(s_eq(u, target)) break;
 			for(const v of this.get_adj(u)) {
 				if(get(v).dist === Infinity) {
 					get(v).dist = get(u).dist + 1;
@@ -171,9 +155,9 @@ export class GMap extends Graph<Point2, number> {
 					q.push(v);
 				}
 			}
+			n_visited_before++;
 		}
 
-		return m;
-
+		return { n_visited_before, m };
 	}
 }
