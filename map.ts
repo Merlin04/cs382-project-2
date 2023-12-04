@@ -81,6 +81,7 @@ export class GMap extends Graph<Point2, number> {
 		}
 		const q = [source];
 
+		let n_visited_before = 0;
 		let u; while(u = q.shift()) {
 			for(const v of this.get_adj(u)) {
 				if(get(v).dist === Infinity) {
@@ -89,9 +90,10 @@ export class GMap extends Graph<Point2, number> {
 					q.push(v);
 				}
 			}
+			n_visited_before++;
 		}
 
-		return { n_visited_before: undefined, m };
+		return { n_visited_before, m };
 	}
 
 	print_shortest_paths(s : ShortestPathsResult) : string {
@@ -104,17 +106,19 @@ export class GMap extends Graph<Point2, number> {
 		return /*`vertices visited: ${s.n_visited_before}\n${*/this.print_str_map(m)/*}`*/;
 	}
 
-	bfs_spsp(source: Point2, dest: Point2) : Path {
+	bfs_spsp(source: Point2, dest: Point2) : { p: Path, n_visited_before: number } {
 		const r = this.bfs_sssp(source).m;
 		const dest_d = r.get(dest);
 		if(!dest_d) throw new Error("Destination not reachable from source");
 		let v = dest_d;
 		let a = [dest];
+		let n_visited_before = 0;
 		while(v.dist !== 0) {
 			a.unshift(v.parent!);
 			v = r.get(v.parent!)!;
+			n_visited_before++;
 		}
-		return a;
+		return { p: a, n_visited_before };
 	}
 
 	print_shortest_path(path: Path) : string {

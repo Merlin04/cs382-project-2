@@ -1,5 +1,5 @@
 import { Graph } from "./graph.ts";
-import { GMap } from "./map.ts";
+import { GMap, Point2 } from "./map.ts";
 import { s_eq } from "./smap.ts";
 
 const assert_eq = <T>(test: T, expected: T) => {
@@ -10,6 +10,18 @@ but got:
 ${test}`);
     }
     return test === expected;
+}
+
+export function compare_vertices_visited() {
+    // Construct a few test maps and compare the number of vertices visited before
+    // reaching the goal for single-pair-BFS vs single-pair Dijkstra/WFS
+    ([
+        [new GMap(5, [[2, 0], [1, 1]]), [4, 0]],
+        [new GMap(4, []), [3, 3]],
+        [new GMap(4, [[1, 3], [3, 3]]), [2, 3]]
+    ] as [GMap, Point2][]).map(([m, target]) =>
+        [m.bfs_spsp([0, 0], target).n_visited_before, m.dijkstra([0, 0], target).n_visited_before])
+        .forEach(v => console.log(v));
 }
 
 const tests: Record<string, (() => boolean)> = {
@@ -47,7 +59,7 @@ const tests: Record<string, (() => boolean)> = {
     },
     "bfs_spsp": () => {
         const m = new GMap(5, [[2, 0], [1, 1]]);
-        const p = m.bfs_spsp([1, 0], [4, 0]);
+        const { p } = m.bfs_spsp([1, 0], [4, 0]);
         return assert_eq(m.print_shortest_path(p), "1 0 # 8 9\n2 # 6 7 .\n3 4 5 . .\n. . . . .\n. . . . .\n");
     },
     "dijkstra's algorithm": () => {
