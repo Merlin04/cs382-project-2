@@ -21,13 +21,14 @@ export class Heap<T> {
     }
 
     pop_min(): T | undefined {
+        if (this.values.length === 1) {
+            return this.values.pop();
+        }
         const val = this.values.at(0);
         const pop = this.values.pop();
         if (pop !== undefined) {
             this.values[0] = pop;
             this.shift_down();
-        } else {
-            return undefined;
         }
         return val;
     }
@@ -38,7 +39,7 @@ export class Heap<T> {
             return;
         } else if (2*i+2 >= this.length) {
             if (this.lt(this.values[2*i+1], this.values[i])) {
-                this.values[i], this.values[2*i+1] = this.values[2*i+1], this.values[i];
+                [this.values[i], this.values[2*i+1]] = [this.values[2*i+1], this.values[i]];
                 // No need to recurse here since we know this is the last value
             }
             return;
@@ -46,7 +47,7 @@ export class Heap<T> {
         if (this.lt(this.values[2*i+1], this.values[i])
             || this.lt(this.values[2*i+2], this.values[i])) {
             let idx = this.lt(this.values[2*i+1], this.values[2*i+2]) ? 2*i+1 : 2*i+2;
-            this.values[i], this.values[idx] = this.values[idx], this.values[i];
+            [this.values[i], this.values[idx]] = [this.values[idx], this.values[i]];
             this.shift_down(idx);
         }
     }
@@ -58,7 +59,7 @@ export class Heap<T> {
         }
         let parent = Math.floor((i-1)/2);
         if (this.lt(this.values[i], this.values[parent])) {
-            this.values[i], this.values[parent] = this.values[parent], this.values[i];
+            [this.values[i], this.values[parent]] = [this.values[parent], this.values[i]];
             this.shift_up(parent);
         }
     }
