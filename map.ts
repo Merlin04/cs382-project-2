@@ -132,6 +132,7 @@ export class GMap extends Graph<Point2, number> {
 			m.set(point, { dist: s_eq(point, source) ? 0 : Infinity, parent: null });
 		}
 		const q = new Heap<Point2>((a: Point2, b: Point2) => get(a).dist < get(b).dist);
+		q.push(source);
 
 		let u; while(u = q.pop_min()) {
 			for(const v of this.get_adj(u)) {
