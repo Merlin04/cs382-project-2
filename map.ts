@@ -148,13 +148,20 @@ export class GMap extends Graph<Point2, number> {
 
 	}
 
-	wfs(source: Point2, heuristic: (map: this, point: Point2) => number) : ShortestPathsResult {
+	wfs(
+		source: Point2,
+		heuristic: (
+			map: this,
+			point: Point2,
+			m: SMap<Point2, { dist : number, parent : Point2 | null }>) => number
+	) : ShortestPathsResult {
 		const m = new SMap<Point2, { dist : number, parent : Point2 | null }>();
 		const get = (v: Point2) => m.get(v)!;
 		for(const [point, _weight] of this.vertices) {
 			m.set(point, { dist: s_eq(point, source) ? 0 : Infinity, parent: null });
 		}
-		const q = new Heap<Point2>((a: Point2, b: Point2) => heuristic(this, a) < heuristic(this, b));
+		const q = new Heap<Point2>((a: Point2, b: Point2) => heuristic(this, a, m) < heuristic(this, b, m));
+		q.push(source);
 
 		let u; while(u = q.pop_min()) {
 			for(const v of this.get_adj(u)) {

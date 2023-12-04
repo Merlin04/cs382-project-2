@@ -54,6 +54,11 @@ const tests: Record<string, (() => boolean)> = {
         const m = new GMap(5, [[2, 0], [1, 1]]);
         const r = m.dijkstra([4, 0]);
         return assert_eq(m.print_shortest_paths(r), "8 9 # 1 0\n7 # 3 2 1\n6 5 4 3 2\n7 6 5 4 3\n8 7 6 5 4\n");
+    },
+    "wfs": () => {
+        const m = new GMap(5, [[2, 0], [1, 1]]);
+        const r = m.wfs([4, 0], (_, p, m) => m.get(p)!.dist);
+        return assert_eq(m.print_shortest_paths(r), "8 9 # 1 0\n7 # 3 2 1\n6 5 4 3 2\n7 6 5 4 3\n8 7 6 5 4\n");
     }
 }
 
