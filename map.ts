@@ -132,36 +132,38 @@ export class GMap extends Graph<Point2, number> {
 	dijkstra(source: Point2, target?: Point2) : ShortestPathsResult {
 		return this.wfs(source, (_, p, m) => m.get(p)!.dist, target);
 	}
-
-	wfs(
-		source: Point2,
-		heuristic: (
-			map: this,
-			point: Point2,
-			m: SMap<Point2, { dist : number, parent : Point2 | null }>) => number,
-		target?: Point2
+    
+    wfs(
+	    source: Point2,
+	    heuristic: (
+		map: this,
+		point: Point2,
+		m: SMap<Point2, { dist : number, parent : Point2 | null }>,
+		additionalArgs?: any[]) => number,
+	    target?: Point2,
+	    additionalArgs?: any[]
 	) : ShortestPathsResult {
-		const m = new SMap<Point2, { dist : number, parent : Point2 | null }>();
-		const get = (v: Point2) => m.get(v)!;
-		for(const [point, _weight] of this.vertices) {
-			m.set(point, { dist: s_eq(point, source) ? 0 : Infinity, parent: null });
-		}
-		const q = new Heap<Point2>((a: Point2, b: Point2) => heuristic(this, a, m) < heuristic(this, b, m));
-		q.push(source);
-
-		let n_visited_before = 0;
-		let u; while(u = q.pop_min()) {
-			if(s_eq(u, target)) break;
-			for(const v of this.get_adj(u)) {
-				if(get(v).dist === Infinity) {
-					get(v).dist = get(u).dist + 1;
-					get(v).parent = u;
-					q.push(v);
-				}
-			}
-			n_visited_before++;
-		}
-
-		return { n_visited_before, m };
+	const m = new SMap<Point2, { dist : number, parent : Point2 | null }>();
+	const get = (v: Point2) => m.get(v)!;
+	for(const [point, _weight] of this.vertices) {
+	    m.set(point, { dist: s_eq(point, source) ? 0 : Infinity, parent: null });
 	}
+	const q = new Heap<Point2>((a: Point2, b: Point2) => heuristic(this, a, m, additionalArgs) < heuristic(this, b, m, additionalArgs));
+	q.push(source);
+
+	let n_visited_before = 0;
+	let u; while(u = q.pop_min()) {
+	    if(s_eq(u, target)) break;
+	    for(const v of this.get_adj(u)) {
+		if(get(v).dist === Infinity) {
+		    get(v).dist = get(u).dist + 1;
+		    get(v).parent = u;
+		    q.push(v);
+		}
+	    }
+	    n_visited_before++;
+	}
+
+	return { n_visited_before, m };
+    }
 }
